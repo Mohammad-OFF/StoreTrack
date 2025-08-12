@@ -126,3 +126,93 @@ app.get('/api/user/:userId', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch user data' });
   }
 });
+
+// --- PRODUCT & INVENTORY APIS ---
+app.get('/api/products', async (req, res) => {
+  try {
+    const [rows] = await pool.execute(
+      'SELECT id, name, inventory, price, category FROM products WHERE inventory > 0'
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res
+      .status(500)
+      .json({ error: 'Failed to fetch products: ' + error.message });
+  }
+});
+
+app.get('/api/products/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await pool.execute('SELECT * FROM products WHERE id = ?', [
+      id,
+    ]);
+    if (rows.length > 0) {
+      res.json(rows[0]);
+    } else {
+      res.status(404).json({ error: 'Product not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    res.status(500).json({ error: 'Failed to fetch product' });
+  }
+});
+
+app.post('/api/add', async (req, res) => {
+  const { name, inventory, price, category } = req.body;
+  if (!name || inventory == null || price == null || !category) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+  try {
+    const [result] = await pool.execute(
+      'INSERT INTO products (name, inventory, price, category) VALUES (?, ?, ?, ?)',
+      [name, inventory, price, category]
+    );
+    res.json({ message: 'Product added', id: result.insertId });
+  } catch (error) {
+    console.error('Error adding product:', error);
+    res.status(500).json({ error: 'Failed to add product: ' + error.message });
+  }
+});
+
+app.put('/api/products/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, inventory, price, category } = req.body;
+  if (!name || inventory == null || price == null || !category) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+  try {
+    const [result] = await pool.execute(
+      'UPDATE products SET name = ?, inventory = ?, price = ?, category = ? WHERE id = ?',
+      [name, inventory, price, category, id]
+    );
+    if (result.affectedRows === 0)
+      return res.status(404).json({ error: 'Product not found' });
+    res.json({ message: 'Product updated successfully' });
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res
+      .status(500)
+      .json({ error: 'Failed to update product: ' + error.message });
+  }
+});
+
+app.delete('/api/products/:id', async (req, res) => {
+  const productId = req.params.id;
+  try {
+    const [result] = await pool.execute('DELETE FROM products WHERE id = ?', [
+      productId,
+    ]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    res.json({ message: 'Product deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    res
+      .status(500)
+      .json({ error: 'Failed to delete product: ' + error.message });
+  }
+});
+
