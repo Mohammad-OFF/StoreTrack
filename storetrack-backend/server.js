@@ -403,3 +403,94 @@ app.get('/api/user/dashboard/:userId', async (req, res) => {
   }
 });
 
+// --- ADMIN-SPECIFIC APIS ---
+app.get('/api/admin/products', async (req, res) => {
+  try {
+    const [rows] = await pool.execute(
+      'SELECT id, name, inventory, price, category FROM products ORDER BY id DESC'
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching all admin products:', error);
+    res
+      .status(500)
+      .json({ error: 'Failed to fetch products: ' + error.message });
+  }
+});
+
+app.get('/api/admin/stats', async (req, res) => {
+  try {
+    const [[{ totalProducts }]] = await pool.execute(
+      'SELECT COUNT(*) as totalProducts FROM products'
+    );
+    const [[{ totalValue }]] = await pool.execute(
+      'SELECT SUM(price * inventory) as totalValue FROM products'
+    );
+    const [[{ lowStockCount }]] = await pool.execute(
+      'SELECT COUNT(*) as lowStockCount FROM products WHERE inventory < 5'
+    );
+    const [productsByCategory] = await pool.execute(
+      'SELECT category, COUNT(*) as count FROM products GROUP BY category'
+    );
+
+    res.json({
+      totalProducts,
+      totalInventoryValue: totalValue || 0,
+      lowStockCount,
+      productsByCategory,
+    });
+  } catch (error) {
+    console.error('Error fetching admin stats:', error);
+    res.status(500).json({ error: 'Failed to fetch admin stats' });
+  }
+});
+
+app.get('/api/admin/users', async (req, res) => {
+  try {
+    const [users] = await pool.execute(
+      'SELECT id, username, email, created_at FROM users ORDER BY created_at DESC'
+    );
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+app.get('/api/admin/orders', async (req, res) => {
+  try {
+    const [orders] = await pool.execute(`
+            SELECT o.id, o.user_id, u.username, o.order_date, o.total_amount, o.status 
+            FROM orders o
+            JOIN users u ON o.user_id = u.id
+            ORDER BY o.order_date DESC
+        `);
+    res.json(orders);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+});
+
+app.put('/api/admin/orders/:orderId/status', async (req, res) => {
+  const { orderId } = req.params;
+  const { status } = req.body;
+  if (!status) {
+    return res.status(400).json({ error: 'Status is required.' });
+  }
+  try {
+    await pool.execute('UPDATE orders SET status = ? WHERE id = ?', [
+      status,
+      orderId,
+    ]);
+    res.json({ message: 'Order status updated successfully.' });
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    res.status(500).json({ error: 'Failed to update order status' });
+  }
+});
+
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`✅ Server running at http://localhost:${PORT}`);
+});
