@@ -216,3 +216,190 @@ app.delete('/api/products/:id', async (req, res) => {
   }
 });
 
+// --- USER SHOPPING CART & CHECKOUT ---
+app.get('/api/cart/:userId', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const [cartItems] = await pool.execute(
+      `
+            SELECT p.id, p.name, p.price, sc.quantity, (p.price * sc.quantity) as total_price
+            FROM shopping_cart sc
+            JOIN products p ON sc.product_id = p.id
+            WHERE sc.user_id = ?`,
+      [userId]
+    );
+    res.json(cartItems);
+  } catch (error) {
+    console.error('Error fetching cart:', error);
+    res.status(500).json({ error: 'Failed to fetch cart: ' + error.message });
+  }
+});
+
+app.post('/api/cart/add', async (req, res) => {
+  const { userId, productId, quantity } = req.body;
+  if (!userId || !productId || !quantity || quantity < 1) {
+    return res
+      .status(400)
+      .json({ error: 'User ID, Product ID, and quantity are required.' });
+  }
+  try {
+    const [existing] = await pool.execute(
+      'SELECT * FROM shopping_cart WHERE user_id = ? AND product_id = ?',
+      [userId, productId]
+    );
+    if (existing.length > 0) {
+      await pool.execute(
+        'UPDATE shopping_cart SET quantity = quantity + ? WHERE user_id = ? AND product_id = ?',
+        [quantity, userId, productId]
+      );
+    } else {
+      await pool.execute(
+        'INSERT INTO shopping_cart (user_id, product_id, quantity) VALUES (?, ?, ?)',
+        [userId, productId, quantity]
+      );
+    }
+    res.json({ message: 'Product added to cart.' });
+  } catch (error) {
+    console.error('Error adding to cart:', error);
+    res
+      .status(500)
+      .json({ error: 'Failed to add product to cart: ' + error.message });
+  }
+});
+
+app.put('/api/cart/update', async (req, res) => {
+  const { userId, productId, quantity } = req.body;
+  if (!userId || !productId || quantity == null || quantity < 0) {
+    return res
+      .status(400)
+      .json({ error: 'User ID, Product ID, and quantity are required.' });
+  }
+  try {
+    if (quantity === 0) {
+      await pool.execute(
+        'DELETE FROM shopping_cart WHERE user_id = ? AND product_id = ?',
+        [userId, productId]
+      );
+      res.json({ message: 'Product removed from cart.' });
+    } else {
+      await pool.execute(
+        'UPDATE shopping_cart SET quantity = ? WHERE user_id = ? AND product_id = ?',
+        [quantity, userId, productId]
+      );
+      res.json({ message: 'Cart updated.' });
+    }
+  } catch (error) {
+    console.error('Error updating cart:', error);
+    res.status(500).json({ error: 'Failed to update cart: ' + error.message });
+  }
+});
+
+app.post('/api/checkout', async (req, res) => {
+  const { userId } = req.body;
+  if (!userId) return res.status(400).json({ error: 'User ID is required.' });
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [cartItems] = await connection.execute(
+      `
+            SELECT sc.product_id, sc.quantity, p.price, p.inventory 
+            FROM shopping_cart sc 
+            JOIN products p ON sc.product_id = p.id 
+            WHERE sc.user_id = ? FOR UPDATE`,
+      [userId]
+    );
+
+    if (cartItems.length === 0) {
+      await connection.rollback();
+      return res.status(400).json({ error: 'Your cart is empty.' });
+    }
+
+    let totalAmount = 0;
+    for (const item of cartItems) {
+      if (item.inventory < item.quantity) {
+        await connection.rollback();
+        return res
+          .status(400)
+          .json({
+            error: `Insufficient inventory for a product in your cart.`,
+          });
+      }
+      totalAmount += item.price * item.quantity;
+    }
+
+    const [orderResult] = await connection.execute(
+      'INSERT INTO orders (user_id, total_amount) VALUES (?, ?)',
+      [userId, totalAmount]
+    );
+    const orderId = orderResult.insertId;
+
+    for (const item of cartItems) {
+      await connection.execute(
+        'INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)',
+        [orderId, item.product_id, item.quantity, item.price]
+      );
+      await connection.execute(
+        'UPDATE products SET inventory = inventory - ? WHERE id = ?',
+        [item.quantity, item.product_id]
+      );
+    }
+
+    await connection.execute('DELETE FROM shopping_cart WHERE user_id = ?', [
+      userId,
+    ]);
+    await connection.commit();
+    res.json({ message: 'Checkout successful! Your order has been placed.' });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error during checkout:', error);
+    res
+      .status(500)
+      .json({ error: 'Failed to process order: ' + error.message });
+  } finally {
+    connection.release();
+  }
+});
+
+app.get('/api/user/orders/:userId', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const [orders] = await pool.execute(
+      'SELECT id, order_date, total_amount, status FROM orders WHERE user_id = ? ORDER BY order_date DESC',
+      [userId]
+    );
+    res.json(orders);
+  } catch (error) {
+    console.error('Error fetching user orders:', error);
+    res.status(500).json({ error: 'Failed to fetch user orders' });
+  }
+});
+
+app.get('/api/user/dashboard/:userId', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const [[user]] = await pool.execute(
+      'SELECT username FROM users WHERE id = ?',
+      [userId]
+    );
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    const [recentOrders] = await pool.execute(
+      'SELECT id, status, order_date, total_amount FROM orders WHERE user_id = ? ORDER BY order_date DESC LIMIT 3',
+      [userId]
+    );
+    const [categories] = await pool.execute(
+      'SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != "" ORDER BY category ASC'
+    );
+    res.json({
+      username: user.username,
+      recentOrders,
+      categories: categories.map((c) => c.category),
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+    res.status(500).json({ error: 'Failed to fetch dashboard data' });
+  }
+});
+
