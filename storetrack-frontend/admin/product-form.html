@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Product - StoreTrack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Rubik:ital@0;1&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div id="loading" class="hidden"><i class="fas fa-spinner fa-spin"></i><span>Loading...</span></div>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <h1 class="sidebar-brand">StoreTrack</h1>
+            <nav class="sidebar-nav">
+                <a href="/admin/dashboard.html#dashboard" class="sidebar-link"><i
+                        class="fas fa-tachometer-alt fa-fw"></i> Dashboard</a>
+                <a href="/admin/dashboard.html#products" class="sidebar-link active"><i
+                        class="fas fa-box-open fa-fw"></i> Products</a>
+                <a href="/admin/dashboard.html#orders" class="sidebar-link"><i class="fas fa-receipt fa-fw"></i>
+                    Orders</a>
+                <a href="/admin/dashboard.html#users" class="sidebar-link"><i class="fas fa-users fa-fw"></i> Users</a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" id="logout" class="sidebar-link"><i class="fas fa-sign-out-alt fa-fw"></i> Logout</a>
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="main-header">
+                <button class="hamburger-menu admin-hamburger">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </button>
+                <h2 id="page-title" class="text-2xl font-bold">Dashboard</h2>
+                <div id="user-info" class="text-right">
+                </div>
+            </header>
+            <!-- <header class="main-header">
+                <h2 id="page-title" class="text-2xl font-bold">Manage Product</h2>
+            </header> -->
+            <div id="content-area" class="content-area">
+                <div class="admin-card">
+                    <form id="product-form" class="beautiful-form">
+                        <input type="hidden" id="product-id" name="id">
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="product-name" class="form-label">Product Name</label>
+                                <input class="form-input" type="text" id="product-name" name="name" required
+                                    placeholder="e.g., Wireless Mouse">
+                            </div>
+                            <div class="form-group">
+                                <label for="product-category" class="form-label">Category</label>
+                                <input class="form-input" type="text" id="product-category" name="category" required
+                                    placeholder="e.g., Electronics">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="product-inventory" class="form-label">Inventory</label>
+                                <input class="form-input" type="number" id="product-inventory" name="inventory" min="0"
+                                    required placeholder="e.g., 150">
+                            </div>
+                            <div class="form-group">
+                                <label for="product-price" class="form-label">Price</label>
+                                <input class="form-input" type="number" id="product-price" name="price" min="0"
+                                    step="0.01" required placeholder="e.g., 49.99">
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <a href="/admin/dashboard.html#products" class="action-button-secondary">Cancel</a>
+                            <button type="submit" class="action-button">Save Product</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div id="toast" class="hidden"></div>
+    <script type="module" src="/admin/js/product-form.js"></script>
+    <script type="module" src="/js/utils.js"></script>
+</body>
+
+</html>
