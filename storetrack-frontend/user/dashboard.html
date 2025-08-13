@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - StoreTrack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Rubik:ital@0;1&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div id="loading" class="hidden"><i class="fas fa-spinner fa-spin"></i><span>Loading...</span></div>
+
+    <nav class="navbar">
+        <a href="/user/dashboard.html" class="navbar-brand">StoreTrack</a>
+        <ul class="nav-links">
+            <li><a href="/user/dashboard.html" class="nav-link">Dashboard</a></li>
+            <li><a href="/user/products.html" class="nav-link">Products</a></li>
+            <li><a href="/user/orders.html" class="nav-link">My Orders</a></li>
+            <li>
+                <a href="/user/cart.html" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i> Cart
+                    <span id="cart-count" class="cart-count-badge">0</span>
+                </a>
+            </li>
+            <li><a href="#" id="logout" class="nav-link">Logout</a></li>
+        </ul>
+        <div id="themeToggle" class="theme-toggle"><i class="fas fa-moon"></i><span>Toggle Theme</span></div>
+    </nav>
+
+    <main class="dashboard-main">
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1 id="welcome-message">Welcome!</h1>
+                <p>Discover our latest collections and find your next favorite item.</p>
+                <a href="/user/products.html" class="action-button hero-button">Start Shopping</a>
+            </div>
+        </section>
+
+        <section class="main-section dashboard-grid-layout">
+            <div class="dashboard-panel">
+                <div class="info-panel">
+                    <h3>Recent Activity</h3>
+                    <ul id="recent-orders-list" class="recent-orders-list"></ul>
+                </div>
+                <div class="info-panel">
+                    <h3>Quick Access</h3>
+                    <div class="quick-access-grid">
+                        <a href="/user/products.html" class="quick-access-item"><i class="fas fa-box-open"></i><span>All
+                                Products</span></a>
+                        <a href="/user/cart.html" class="quick-access-item"><i
+                                class="fas fa-shopping-cart"></i><span>Your Cart</span></a>
+                        <a href="/user/orders.html" class="quick-access-item"><i class="fas fa-receipt"></i><span>Order
+                                History</span></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-panel">
+                <div class="info-panel">
+                    <h3>Explore by Category</h3>
+                    <div id="category-grid" class="category-grid"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="toast" class="hidden"></div>
+    <script type="module" src="/user/js/app.js"></script>
+</body>
+
+</html>
