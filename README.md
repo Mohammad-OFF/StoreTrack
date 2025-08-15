@@ -1,4 +1,4 @@
-# StoreTrack 📦
+# StoreTrack 
 **Inventory & Order Management System**
 
 StoreTrack is a complete and user-friendly **inventory and order management system** built with **Node.js** for the backend and modern web technologies for the frontend.  
