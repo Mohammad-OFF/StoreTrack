@@ -88,24 +88,24 @@ http://localhost:3000
 > ### Dashboard
 - **Admin**
 
-![Dashboard Screenshot](images\admin-dashbord-extend.jpg)
+![Dashboard Screenshot](images/admin-dashbord-extend.jpg)
 
 - **Users**  
 
-![Dashboard Screenshot](images\user-dashbord.jpg)
+![Dashboard Screenshot](images/user-dashbord.jpg)
 
 >### Products List
 - **Admin**
 
-![Dashboard Screenshot](images\admin-product.jpg)
+![Dashboard Screenshot](images/admin-product.jpg)
 
 - **Users**  
 
-![Dashboard Screenshot](images\user-products.jpg)
+![Dashboard Screenshot](images/user-products.jpg)
 
 >### Users Cart
 
-![Dashboard Screenshot](images\user-carts.jpg)
+![Dashboard Screenshot](images/user-carts.jpg)
 
 
 ---
