@@ -14,23 +14,17 @@ services:
     networks:
       - storetrack_net
 
-  mysql:
-    image: mysql:5.7
-    container_name: storetrack_mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: storage_db
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./storage_db.sql:/docker-entrypoint-initdb.d/storage_db.sql
-    restart: unless-stopped
-    networks:
-      - storetrack_net
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+mysql:
+  image: mysql:5.7
+  container_name: storetrack_mysql
+  environment:
+    MYSQL_ROOT_PASSWORD: root
+    MYSQL_DATABASE: storage_db
+  volumes:
+    - mysql_data:/var/lib/mysql
+    - ./storage_db.sql:/docker-entrypoint-initdb.d/storage_db.sql
+  restart: unless-stopped
+
 
 volumes:
   mysql_data:
