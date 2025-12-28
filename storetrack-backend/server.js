@@ -21,13 +21,26 @@ const dbConfig = {
 
 const pool = mysql.createPool(dbConfig);
 
-pool
-  .getConnection()
-  .then(() => console.log('✅ Connected to MySQL.'))
-  .catch((err) => {
-    console.error('❌ MySQL connection error:', err);
-    process.exit(1);
-  });
+async function connectWithRetry(retries = 10, delay = 3000) {
+  for (let i = 1; i <= retries; i++) {
+    try {
+      const connection = await pool.getConnection();
+      console.log('✅ Connected to MySQL.');
+      connection.release();
+      return;
+    } catch (err) {
+      console.error(`❌ MySQL connection attempt ${i} failed. Retrying...`);
+      if (i === retries) {
+        console.error('❌ Could not connect to MySQL after retries.');
+        process.exit(1);
+      }
+      await new Promise((res) => setTimeout(res, delay));
+    }
+  }
+}
+
+connectWithRetry();
+
 
 // --- USER AUTHENTICATION & REGISTRATION ---
 app.post('/api/login', async (req, res) => {
