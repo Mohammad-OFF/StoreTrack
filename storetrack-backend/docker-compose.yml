@@ -1,17 +1,18 @@
 version: "3.9"
 
 services:
-  mysql:
-    image: mariadb:10.5
-    container_name: storetrack_mysql
+  app:
+    build: .
+    container_name: storetrack_app
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: storage_db
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - storetrack_net
+      DB_HOST: host.docker.internal
+      DB_USER: appuser
+      DB_PASSWORD: apppass
+      DB_NAME: storage_db
+      PORT: 3000
+    ports:
+      - "3000:3000"
 
   app:
     build: .
