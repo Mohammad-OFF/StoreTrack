@@ -13,10 +13,10 @@ app.get('/', (req, res) => {
 });
 
 const dbConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: 'root',
-  database: 'storage_db',
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'root',
+  database: process.env.DB_NAME || 'storage_db',
 };
 
 const pool = mysql.createPool(dbConfig);
@@ -319,11 +319,9 @@ app.post('/api/checkout', async (req, res) => {
     for (const item of cartItems) {
       if (item.inventory < item.quantity) {
         await connection.rollback();
-        return res
-          .status(400)
-          .json({
-            error: `Insufficient inventory for a product in your cart.`,
-          });
+        return res.status(400).json({
+          error: `Insufficient inventory for a product in your cart.`,
+        });
       }
       totalAmount += item.price * item.quantity;
     }
