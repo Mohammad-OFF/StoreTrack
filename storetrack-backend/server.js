@@ -13,12 +13,11 @@ app.get('/', (req, res) => {
 });
 
 const dbConfig = {
-  host: process.env.DB_HOST || 'mysql',
-  user: process.env.DB_USER || 'appuser',
-  password: process.env.DB_PASSWORD || 'apppass',
-  database: process.env.DB_NAME || 'storage_db',
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
 };
-
 
 async function connectWithRetry(retries = 10, delay = 3000) {
   for (let i = 1; i <= retries; i++) {
@@ -28,15 +27,18 @@ async function connectWithRetry(retries = 10, delay = 3000) {
       connection.release();
       return;
     } catch (err) {
-      console.error(`❌ MySQL connection attempt ${i} failed. Retrying in ${delay/1000}s...`);
+      console.error(
+        `❌ MySQL connection attempt ${i} failed. Retrying in ${
+          delay / 1000
+        }s...`
+      );
       if (i === retries) process.exit(1);
-      await new Promise(res => setTimeout(res, delay));
+      await new Promise((res) => setTimeout(res, delay));
     }
   }
 }
 
 connectWithRetry();
-
 
 // --- USER AUTHENTICATION & REGISTRATION ---
 app.post('/api/login', async (req, res) => {
