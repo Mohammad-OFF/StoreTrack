@@ -13,11 +13,12 @@ app.get('/', (req, res) => {
 });
 
 const dbConfig = {
-  host: 'localhost',
-  user: 'appuser',
-  password: 'apppass',
+  host: '127.0.0.1',       // یا localhost
+  user: 'root',             // یا یوزر دلخواه که دسترسی دارد
+  password: 'root',
   database: 'storage_db',
 };
+
 
 async function connectWithRetry(retries = 10, delay = 3000) {
   for (let i = 1; i <= retries; i++) {
