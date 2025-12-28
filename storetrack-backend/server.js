@@ -29,7 +29,7 @@ async function connectWithRetry(retries = 10, delay = 3000) {
       connection.release();
       return;
     } catch (err) {
-      console.error(`❌ MySQL connection attempt ${i} failed. Retrying...`);
+      console.error(`❌ MySQL connection attempt ${i} failed. Retrying in ${delay/1000}s...`);
       if (i === retries) {
         console.error('❌ Could not connect to MySQL after retries.');
         process.exit(1);
