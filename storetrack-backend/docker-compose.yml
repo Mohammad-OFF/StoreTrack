@@ -14,7 +14,7 @@ services:
     ports:
       - "3000:3000"
 
-  app:
+app:
     build: .
     container_name: storetrack_app
     restart: unless-stopped
