@@ -1,33 +1,44 @@
-version: '3.8'
+version: "3.9"
 
 services:
-  app:
-    build: .
-    container_name: storetrack_app
-    ports:
-      - "3000:3000"
-    depends_on:
-      - mysql
-    environment:
-      NODE_ENV: production
+  mysql:
+    image: mysql:5.7
+    container_name: storetrack_mysql
     restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: storage_db
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppass
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # فایل دیتابیس اولیه (اختیاری)
+      - ./storage_db.sql:/docker-entrypoint-initdb.d/storage_db.sql
+    ports:
+      - "3306:3306"
     networks:
       - storetrack_net
 
-mysql:
-  image: mysql:5.7
-  container_name: storetrack_mysql
-  environment:
-    MYSQL_ROOT_PASSWORD: root
-    MYSQL_DATABASE: storage_db
-  volumes:
-    - mysql_data:/var/lib/mysql
-    - ./storage_db.sql:/docker-entrypoint-initdb.d/storage_db.sql
-  restart: unless-stopped
-
+  app:
+    build: .
+    container_name: storetrack_app
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      DB_HOST: mysql
+      DB_USER: appuser
+      DB_PASSWORD: apppass
+      DB_NAME: storage_db
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    networks:
+      - storetrack_net
 
 volumes:
   mysql_data:
 
 networks:
   storetrack_net:
+    driver: bridge
