@@ -13,11 +13,12 @@ app.get('/', (req, res) => {
 });
 
 const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'root',
+  host: process.env.DB_HOST || 'mysql',
+  user: process.env.DB_USER || 'appuser',
+  password: process.env.DB_PASSWORD || 'apppass',
   database: process.env.DB_NAME || 'storage_db',
 };
+
 
 async function connectWithRetry(retries = 10, delay = 3000) {
   for (let i = 1; i <= retries; i++) {
