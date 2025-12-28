@@ -13,8 +13,6 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./storage_db.sql:/docker-entrypoint-initdb.d/storage_db.sql
-    ports:
-      - "3306:3306"
     networks:
       - storetrack_net
 
