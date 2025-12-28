@@ -6,7 +6,7 @@ services:
     container_name: storetrack_app
     restart: unless-stopped
     environment:
-      DB_HOST: localhost
+      DB_HOST: 172.17.0.1
       DB_USER: appuser
       DB_PASSWORD: apppass
       DB_NAME: storage_db
