@@ -2,22 +2,22 @@ version: "3.9"
 
 services:
   mysql:
-    image: mysql:5.7
-    container_name: storetrack_mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: storage_db
-      MYSQL_USER: appuser
-      MYSQL_PASSWORD: apppass
-    volumes:
-      - mysql_data:/var/lib/mysql
-      # فایل دیتابیس اولیه (اختیاری)
-      - ./storage_db.sql:/docker-entrypoint-initdb.d/storage_db.sql
-    ports:
-      - "3306:3306"
-    networks:
-      - storetrack_net
+  image: mariadb:10.5
+  container_name: storetrack_mysql
+  restart: unless-stopped
+  environment:
+    MYSQL_ROOT_PASSWORD: root
+    MYSQL_DATABASE: storage_db
+    MYSQL_USER: appuser
+    MYSQL_PASSWORD: apppass
+  volumes:
+    - mysql_data:/var/lib/mysql
+    - ./storage_db.sql:/docker-entrypoint-initdb.d/storage_db.sql
+  ports:
+    - "3306:3306"
+  networks:
+    - storetrack_net
+
 
   app:
     build: .
